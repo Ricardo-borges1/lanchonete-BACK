@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model tbl_categoria {
+  id_categoria          Int                     @id @default(autoincrement())
+  nome                  String                  @db.VarChar(100)
+  tbl_categoria_produto tbl_categoria_produto[]
+}
+
+model tbl_categoria_produto {
+  id_categoria_produto Int           @id @default(autoincrement())
+  id_categoria         Int
+  id_produto           Int
+  tbl_categoria        tbl_categoria @relation(fields: [id_categoria], references: [id_categoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_categoria_produto_tbl_categoria")
+  tbl_produto          tbl_produto   @relation(fields: [id_produto], references: [id_produto], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_categoria_produto_tbl_produto")
+
+  @@index([id_categoria], map: "fk_tbl_categoria_produto_tbl_categoria_id")
+  @@index([id_produto], map: "fk_tbl_categoria_produto_tbl_produto_id")
+}
+
+model tbl_cliente {
+  id_cliente   Int           @id @default(autoincrement())
+  nome         String        @db.VarChar(100)
+  email        String        @db.VarChar(100)
+  telefone     String        @db.VarChar(45)
+  senha        String        @db.VarChar(45)
+  id_endereco  Int
+  tbl_endereco tbl_endereco  @relation(fields: [id_endereco], references: [id_endereco], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_cliente_tbl_endereco")
+  tbl_pedidos  tbl_pedidos[]
+
+  @@index([id_endereco], map: "fk_tbl_cliente_tbl_endereco_id")
+}
+
+model tbl_credito {
+  id_credito          Int                   @id @default(autoincrement())
+  numero              String                @db.VarChar(30)
+  nome_titular        String                @db.VarChar(100)
+  validade            DateTime              @db.Date
+  cvv                 String                @db.VarChar(3)
+  tbl_forma_pagamento tbl_forma_pagamento[]
+}
+
+model tbl_debito {
+  id_debito           Int                   @id @default(autoincrement())
+  numero              String                @db.VarChar(30)
+  nome_titular        String                @db.VarChar(100)
+  validade            DateTime              @db.Date
+  cvv                 String                @db.VarChar(3)
+  tbl_forma_pagamento tbl_forma_pagamento[]
+}
+
+model tbl_endereco {
+  id_endereco Int           @id @default(autoincrement())
+  cidade      String        @db.VarChar(80)
+  cep         String        @db.VarChar(8)
+  rua         String        @db.VarChar(100)
+  bairro      String        @db.VarChar(45)
+  numero      Int
+  complemento String?       @db.VarChar(150)
+  tbl_cliente tbl_cliente[]
+}
+
+model tbl_forma_pagamento {
+  id_forma_pagamento Int             @id @default(autoincrement())
+  pix                String?         @db.VarChar(45)
+  id_credito         Int?
+  id_debito          Int?
+  tbl_credito        tbl_credito?    @relation(fields: [id_credito], references: [id_credito], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_forma_pagamento_tbl_credito")
+  tbl_debito         tbl_debito?     @relation(fields: [id_debito], references: [id_debito], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_forma_pagamento_tbl_debito")
+  tbl_pagamento      tbl_pagamento[]
+
+  @@index([id_credito], map: "fk_tbl_forma_pagamento_tbl_credito_id")
+  @@index([id_debito], map: "fk_tbl_forma_pagamento_tbl_debito_id")
+}
+
+model tbl_ingrediente {
+  id_ingrediente          Int                       @id @default(autoincrement())
+  nome                    String                    @db.VarChar(100)
+  quantidade              Int
+  tabela_nutricional      String                    @db.VarChar(150)
+  tbl_ingrediente_produto tbl_ingrediente_produto[]
+}
+
+model tbl_ingrediente_produto {
+  id_ingrediente_produto Int             @id @default(autoincrement())
+  id_produto             Int
+  id_ingrediente         Int
+  tbl_ingrediente        tbl_ingrediente @relation(fields: [id_ingrediente], references: [id_ingrediente], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_ingrediente_produto_tbl_ingrediente")
+  tbl_produto            tbl_produto     @relation(fields: [id_produto], references: [id_produto], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_ingrediente_produto_tbl_produto")
+
+  @@index([id_ingrediente], map: "fk_tbl_ingrediente_produto_tbl_ingrediente_id")
+  @@index([id_produto], map: "fk_tbl_ingrediente_produto_tbl_produto_id")
+}
+
+model tbl_pagamento {
+  id_pagamento        Int                 @id @default(autoincrement())
+  valor_total         Float               @db.Float
+  horario_pagamento   DateTime            @db.Time(0)
+  id_forma_pagamento  Int
+  tbl_forma_pagamento tbl_forma_pagamento @relation(fields: [id_forma_pagamento], references: [id_forma_pagamento], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_pagamento_tbl_forma_pagamento")
+  tbl_pedidos         tbl_pedidos[]
+
+  @@index([id_forma_pagamento], map: "fk_tbl_pagamento_tbl_forma_pagamento_id")
+}
+
+model tbl_pedido_produto {
+  id_pedido_produto Int         @id @default(autoincrement())
+  id_produto        Int
+  id_pedido         Int
+  tbl_pedidos       tbl_pedidos @relation(fields: [id_pedido], references: [id_pedido], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_pedido_produto_tbl_pedidos")
+  tbl_produto       tbl_produto @relation(fields: [id_produto], references: [id_produto], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_pedido_produto_tbl_produto")
+
+  @@index([id_pedido], map: "fk_tbl_pedido_produto_tbl_pedidos_id")
+  @@index([id_produto], map: "fk_tbl_pedido_produto_tbl_produto_id")
+}
+
+model tbl_pedidos {
+  id_pedido          Int                  @id @default(autoincrement())
+  data_pedido        DateTime             @db.Date
+  tempo_entrega      DateTime             @db.Time(0)
+  taxa_entrega       Float                @db.Float
+  desconto           Int?
+  id_cliente         Int
+  id_pagamento       Int
+  tbl_pedido_produto tbl_pedido_produto[]
+  tbl_cliente        tbl_cliente          @relation(fields: [id_cliente], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_pedidos_tbl_cliente")
+  tbl_pagamento      tbl_pagamento        @relation(fields: [id_pagamento], references: [id_pagamento], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_pedidos_tbl_pagamento")
+
+  @@index([id_cliente], map: "fk_tbl_pedidos_tbl_cliente_id")
+  @@index([id_pagamento], map: "fk_tbl_pedidos_tbl_pagamento1_idx")
+}
+
+model tbl_perfil {
+  id_perfil              Int         @id @default(autoincrement())
+  tbl_usuario_id_usuario Int
+  tbl_usuario            tbl_usuario @relation(fields: [tbl_usuario_id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_tbl_perfil_tbl_usuario")
+
+  @@index([tbl_usuario_id_usuario], map: "fk_tbl_perfil_tbl_usuario_id")
+}
+
+model tbl_produto {
+  id_produto              Int                       @id @default(autoincrement())
+  nome                    String                    @db.VarChar(45)
+  valor                   Float                     @db.Float
+  foto                    String                    @db.VarChar(150)
+  tabela_nutricional      String                    @db.VarChar(150)
+  quantidade              Int
+  descricao               String                    @db.Text
+  tbl_categoria_produto   tbl_categoria_produto[]
+  tbl_ingrediente_produto tbl_ingrediente_produto[]
+  tbl_pedido_produto      tbl_pedido_produto[]
+}
+
+model tbl_usuario {
+  id_usuario Int          @id @default(autoincrement())
+  cargo      String       @db.VarChar(100)
+  email      String       @db.VarChar(100)
+  senha      String       @db.VarChar(45)
+  tbl_perfil tbl_perfil[]
+}
