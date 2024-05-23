@@ -207,6 +207,8 @@ const setExcluirEndereco = async(id) => {
         return message.ERROR_INTERNAL_SERVER
     }
 }
+console.log('lol')
+
 
 module.exports = {
     getListarEndereco,

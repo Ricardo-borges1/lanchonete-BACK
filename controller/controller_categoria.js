@@ -27,6 +27,8 @@ const getListarCategoria = async function() {
     }
 }
 
+console.log('lol')
+
 const getBuscarCategoriaId = async function (id){
 
     try{

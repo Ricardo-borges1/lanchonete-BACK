@@ -18,6 +18,8 @@ const selectAllEndereco = async function(){
     }
 }
 
+console.log('lol')
+
 
 const selectEnderecobyID = async function(id){
     try {
